@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  attributeFormDefault="unqualified"
+  elementFormDefault="qualified"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  id="Article">
+
+  <xsd:complexType name="meta">
+    <xsd:sequence>
+      <xsd:element name="id" type="xsd:string"  minOccurs="1" />
+      <xsd:element name="type" type="xsd:string" minOccurs="1" />
+      <xsd:element name="author" type="xsd:string" minOccurs="1" />
+      <xsd:element name="reviewer" type="xsd:string" minOccurs="1" />
+      <xsd:element name="date" type="xsd:string" minOccurs="1" />
+      <xsd:element name="revision" type="xsd:string" minOccurs="1" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="ref">
+    <xsd:attribute name="host" type="xsd:string" use="required" />
+    <xsd:attribute name="id" type="xsd:string" use="required" />
+    <xsd:attribute name="text" type="xsd:string"  use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="reflist">
+    <xsd:sequence>
+      <xsd:element name="ref" type="ref" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="sequence">
+    <xsd:sequence>
+      <xsd:element name="references" type="reflist" minOccurs="1" />
+      <xsd:element name="row" type="xsd:string" />
+    </xsd:sequence>
+    <xsd:attribute name="description" type="xsd:string"  use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="triangle">
+    <xsd:sequence>
+      <xsd:element name="references" type="reflist" minOccurs="0" />
+      <xsd:element name="row" type="xsd:string" maxOccurs="unbounded" />
+    </xsd:sequence>
+    <xsd:attribute name="description" type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="rectangle">
+    <xsd:sequence>
+      <xsd:element name="references" type="reflist" minOccurs="0" />
+      <xsd:element name="row" type="xsd:string"  maxOccurs="unbounded" />
+      <xsd:element name="arow"  type="xsd:string" />
+      <xsd:element name="acol"  type="xsd:string" />
+    </xsd:sequence>
+    <xsd:attribute name="description" type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="formula">
+    <xsd:attribute name="latex" type="xsd:boolean" use="required" />
+    <xsd:attribute name="equation" type="xsd:string" use="required" />
+    <xsd:attribute name="date" type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="listing">
+    <xsd:sequence>
+      <xsd:element name="source" type="xsd:string" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="figure">
+    <xsd:attribute name="description" type="xsd:string" use="required" />
+    <xsd:attribute name="author" type="xsd:string"  use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="entry">
+    <xsd:sequence>
+      <xsd:element name="references" type="reflist" minOccurs="0" />
+      <xsd:element name="formula" type="formula" minOccurs="1" />
+      <xsd:element name="sage" type="listing" minOccurs="0" />
+      <xsd:element name="figure" type="figure" minOccurs="0" />
+    </xsd:sequence>
+    <xsd:attribute name="category" type="xsd:string" use="required" />
+    <xsd:attribute name="description" type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="entrylist">
+    <xsd:sequence>
+      <xsd:element name="entry" type="entry" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="code">
+    <xsd:sequence>
+      <xsd:element name="sage" type="listing" minOccurs="1" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="article">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="meta" type="meta" minOccurs="1" />
+        <xsd:element name="sequence" type="sequence" minOccurs="0" />
+        <xsd:element name="triangle" type="triangle" minOccurs="0" />
+        <xsd:element name="rectangle" type="rectangle" minOccurs="0" />
+        <xsd:element name="implementation" type="code" minOccurs="1" />
+        <xsd:element name="interpretations" type="entrylist" minOccurs="1" />
+        <xsd:element name="generators" type="entrylist" minOccurs="1" />
+        <xsd:element name="formulas" type="entrylist" minOccurs="1" />
+        <xsd:element name="transforms" type="entrylist" minOccurs="1" />
+        <xsd:element name="extensions" type="entrylist" minOccurs="1" />
+        <xsd:element name="polyvalues" type="rectangle" minOccurs="0" />
+        <xsd:element name="related" type="reflist" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>

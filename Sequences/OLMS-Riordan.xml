@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article xsi:noNamespaceSchemaLocation="http://olms.onl/schemas/OLMS-Schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Riordan Numbers">
+  <meta>
+    <id>Z0001</id>
+    <type>1dim</type>
+    <author>Peter Luschny</author>
+    <reviewer>NN</reviewer>
+    <date>2015-01-12</date>
+    <revision>1</revision>
+  </meta>
+  <sequence>
+    <references>
+      <ref host="oeis" id="A005043" />
+    </references>
+    <row>1,0,1,1,3,6,15,36,91,232,603,1585,4213,11298,30537,83097</row>
+  </sequence>
+  <implementation>
+    <sage>
+      <source>class RiordanClass(OLMS1):</source>
+      <source>    def generator(self):   # generator</source>
+      <source>        a, b, n = 1, 0, 1</source>
+      <source>        yield a</source>
+      <source>        while True:</source>
+      <source>            yield b</source>
+      <source>            n += 1</source>
+      <source>            a, b = b, (2*b+3*a)*(n-1)//(n+1)</source>
+    </sage>
+  </implementation>
+  <interpretations>
+    <entry description=""       category="Interpretation" >
+      <references>
+        <ref host="wikipedia" text="Partitions" id="Noncrossing_partition" />
+      </references>
+      <formula  latex="false"  equation="Noncrossing partitions of {1,2,...,n} that contain no singletons."     />
+      <figure  description="Genji symbols"      />
+    </entry>
+    <entry description=""       category="Interpretation" >
+      <references>
+        <ref host="mathworld" text="Motzkin paths" id="MotzkinNumber" />
+      </references>
+      <formula  latex="false"  equation="Motzkin paths of length n with no horizontal steps at level 0."      />
+    </entry>
+    <entry description=""       category="Interpretation" >
+      <references>
+        <ref host="mathworld" text="Ordered trees" id="OrderedTree" />
+      </references>
+      <formula  latex="false"  equation="Ordered trees with n edges and no vertices of outdegree 1."    />
+    </entry>
+  </interpretations>
+  <generators>
+    <entry description="Recurrence starting A&lt;sub&gt;0&lt;/sub&gt; = 1 and A&lt;sub&gt;1&lt;/sub&gt; = 0."       category="Generator" >
+      <formula  latex="true"  equation = "A_{n} \ = \ \frac{n-1}{n+1}(2\,A_{n-1}+3\,A_{n-2})"    />
+      <sage>
+        <source>@cached_function</source>
+        <source>def F?(n):</source>
+        <source>    if n==0: return 1</source>
+        <source>    if n==1: return 0</source>
+        <source>    return (2*F?(n-1)+3*F?(n-2))*(n-1)//(n+1)</source>
+        <source>print [F?(n) for n in range(12)]</source>
+      </sage>
+    </entry>
+    <entry description="Ordinary generating function"       category="Generator" >
+      <formula  latex="true"  equation="A_{n} \ = \ [x^n] \frac{2}{1+x+\sqrt {(1+x)(1-3\,x)}}"     />
+      <sage>
+        <source>F? = 2/(1+x+sqrt((1+x)*(1-3*x)))</source>
+        <source>print taylor(F?, x, 0, 11).list()</source>
+      </sage>
+    </entry>
+    <entry description="Exponential generating function: "       category="Generator" >
+      <references>
+        <ref host="dlmf" text="I&lt;sub&gt;n&lt;/sub&gt; Bessel function" id="10.25#ii" />
+      </references>
+      <formula   latex="true"   equation="A_{n} \, = \, n!\, [x^n]\, e^{x} (\operatorname{I}_0(2\,x) - \operatorname{I}_1(2\,x))"    />
+      <sage>
+        <source>F? = exp(x)*(bessel_I(0, 2*x)-bessel_I(1, 2*x))</source>
+        <source>print [factorial(n)*c for n, c in enumerate(taylor(F?, x, 0, 11).list())]</source>
+      </sage>
+    </entry>
+    <entry description="Special function: "       category="Generator" >
+      <references>
+        <ref host="dlmf" text="Hypergeometric series &lt;sub&gt;2&lt;/sub&gt;F&lt;sub&gt;1&lt;/sub&gt;" id="15.2.4" />
+      </references>
+      <formula  latex="true"  equation="A_{n} \ = \  (-1)^{n} \operatorname{F}\left(\genfrac{}{\vert}{0pt}{}{-n,1/2}{2} 4\right)"    />
+      <sage>
+        <source>F? = lambda n: (-1)^n*hypergeom([-n,1/2],[2],4)</source>
+        <source>check(F?, Riordan, 12)</source>
+      </sage>
+    </entry>
+    <entry description="Special function: "       category="Generator" >
+      <references>
+        <ref host="dlmf" text="P&lt;sub&gt;n&lt;/sub&gt; Jacobi function" id="18.30#E4" />
+      </references>
+      <formula  latex="true"  equation="A_{n} \ = \  \frac{(-1)^{n}}{n+1} \operatorname{P}_n^{(1,\,-n-3/2)}\, (-7)"     />
+      <sage>
+        <source>F? = lambda n: (-1)^n*jacobi_P(n,1,-n-3/2,-7)//(n+1)</source>
+        <source>check(F?, Riordan, 12)</source>
+      </sage>
+    </entry>
+  </generators>
+  <formulas>
+    <entry  category="Formula" >
+      <references>
+        <ref host="oeis" id="A071947" />
+        <ref host="oeis" id="A027907" />
+      </references>
+      <formula  latex="true"  equation="A_{n} \ = \  \sum \limits_{k=0}^{n} \binom{n}{k} \left(\binom{k}{n-k} - \binom{k}{n-k-1} \right)"      />
+      <sage>
+        <source>F? = lambda n: sum(binomial(n,k)*(binomial(k,n-k)-binomial(k,n-k-1)) for k in (0..n))</source>
+        <source>check(F?, Riordan, 12)</source>
+      </sage>
+    </entry>
+    <entry  category="Formula" >
+      <references>
+        <ref host="oeis" id="A108263" />
+      </references>
+      <formula  latex="true"  equation="A_{n} \ = \  \sum \limits_{k=0}^{n} \binom{n}{k}\binom{k-1}{2k-n}\frac{1}{k+1}"      />
+      <sage>
+        <source>F? = lambda n: sum(binomial(n,k)*binomial(k-1,2*k-n)//(k+1) for k in (0..n))</source>
+        <source>check(F?, Riordan, 12)</source>
+      </sage>
+    </entry>
+    <entry  category="Formula" >
+      <references>
+        <ref host="oeis" text="M&lt;sub&gt;n&lt;/sub&gt; Motzkin number" id="A001006" />
+      </references>
+      <formula  latex="true"  equation="A_{n+1} \ = \  M_{n} - A_{n}"      />
+      <sage>
+        <source>M = MotzkinClass().generator()</source>
+        <source>R = RiordanClass().generator()</source>
+        <source>print [M.next() - R.next() for _ in range(12)]</source>
+        <source>print Riordan.sequence(13)[1:]</source>
+      </sage>
+    </entry>
+    <entry  category="Formula" >
+      <references>
+        <ref host="oeis" text="Row sums of Motzkin triangle M&lt;sub&gt;n,k&lt;/sub&gt;" id="A238763" />
+        <ref host="oeis" id="A020474" />
+      </references>
+      <formula  latex="true"  equation="A_{n+2} \ = \  \sum \limits_{k=0}^{n} M_{n,\,k} "      />
+      <sage>
+        <source>@cached_function</source>
+        <source>def M(n, k):</source>
+        <source>   if k&lt;0 or n&lt;k: return 0</source>
+        <source>   if k==0: return 0^n</source>
+        <source>   return M(n,k-1) + M(n-1,k-1) + M(n-2,k-1)</source>
+        <source>
+        </source>
+        <source>F? = lambda n: sum(M(n,k) for k in (0..n))</source>
+        <source>R = Riordan.generator(); R.next(); R.next();</source>
+        <source>check(F?, R, 12)</source>
+      </sage>
+    </entry>
+  </formulas>
+  <transforms>
+    <entry    category="Transforms" >
+      <references>
+        <ref host="olms" text="Partial sum" id="PartialSum" />
+        <ref host="oeis" id="A082395" />
+      </references>
+      <formula  latex="true"  equation="\mathbb{A}_n(1) \ = \  \sum \limits_{k=0}^{n}(-1)^{k}\binom{n+1}{k+1} \binom{k}{\lfloor{k/2}\rfloor}"      />
+      <sage>
+        <source>F?_lhs = partial_sum(Riordan.generator())</source>
+        <source>F?_rhs = lambda n: sum((-1)^k*binomial(n+1,k+1)*binomial(k,k//2) for k in (0..n))</source>
+        <source>check(F?_lhs, F?_rhs, 12)</source>
+      </sage>
+    </entry>
+    <entry  category="Transforms" >
+      <references>
+        <ref host="olms" text="Self convolution" id="SelfConvolution" />
+        <ref host="oeis" id="A187306" />
+        <ref host="oeis" text="M&lt;sub&gt;k&lt;/sub&gt; Motzkin number" id="A001006" />
+      </references>
+      <formula  latex="true"  equation="\mathbb{A}_n(A_k) \ = \  A_{n+1} + (-1)^{n} \ = \  \sum \limits_{k=0}^{n} (-1)^{n-k}\,M_k"      />
+      <sage>
+        <source>F?_lhs = self_convolution(Riordan.generator())</source>
+        <source>F?_rhs = alternating_sign(alternating_sum(MotzkinClass().generator()))</source>
+        <source>check(F?_lhs, F?_rhs, 12)</source>
+      </sage>
+    </entry>
+    <entry    category="Transforms" >
+      <references>
+        <ref host="olms" text="Binomial transformation" id="BinomialTrans" />
+        <ref host="oeis" text="C&lt;sub&gt;n&lt;/sub&gt; Catalan number" id="A000108" />
+      </references>
+      <formula  latex="true"  equation="\mathbb{B}_n(A_k) \ = \  C_n"      />
+      <sage>
+        <source>F?_lhs = binomial_trans(Riordan.generator())</source>
+        <source>F?_rhs = CatalanClass().generator()</source>
+        <source>check(F?_lhs, F?_rhs, 12)</source>
+      </sage>
+    </entry>
+    <entry  category="Transforms" >
+      <references>
+        <ref host="oeis" id="A098474" />
+        <ref host="oeis" id="A032357" />
+        <ref host="oeis" text="C&lt;sub&gt;k&lt;/sub&gt; Catalan number" id="A000108" />
+      </references>
+      <formula  latex="true"  equation="\mathbb{B}_n^{*}(C_k) \ = \  A_{n}"      />
+      <sage>
+        <source>F? = binomial_invtrans(CatalanClass().generator())</source>
+        <source>check(F?, Riordan.generator(), 12)</source>
+      </sage>
+    </entry>
+    <entry    category="Transforms" >
+      <references>
+        <ref host="olms" text="Inverse binomial transformation" id="BinomialTransInv" />
+        <ref host="oeis" id="A126930" />
+        <ref host="oeis" id="A001405" />
+      </references>
+      <formula  latex="true"  equation ="\mathbb{B}_n^{*}(A_k) \ = \  (-1)^n \binom{n}{\lfloor{n/2}\rfloor}"      />
+      <sage>
+        <source>F?_lhs = binomial_invtrans(Riordan.generator())</source>
+        <source>F?_rhs = lambda n: (-1)^n*binomial(n,n//2)</source>
+        <source>check(F?_lhs, F?_rhs, 12)</source>
+      </sage>
+    </entry>
+  </transforms>
+  <extensions>
+    <entry  description="Interpolating function"  category="Extension" >
+      <formula  latex="true"  equation="A(z) \ = \  F\left(\genfrac{}{\vert}{0pt}{}{-z,1/2}{2} 4\right)e^{i \pi z}"      />
+      <sage>
+        <source>A = lambda z: exp(I*pi*z)*hypergeom([-z,1/2],[2],4)</source>
+        <source>print [A(z) for z in (0..12)]</source>
+      </sage>
+    </entry>
+    <entry  description="Integral"  category="Extension" >
+      <formula  latex = "true"  equation = "A(z) \ = \  \frac{1}{\pi} { \int_{0}^{4 }\! (x - 1)^{z} \sqrt{\frac{1}{x} - \frac{1}{4}} \, dx}"      />
+      <sage>
+        <source>F? = lambda z: (1/pi)*integral((x-1)^z*sqrt(1/x-1/4), x,0,4)</source>
+        <source>print [F?(z) for z in (0..12)]</source>
+      </sage>
+    </entry>
+    <entry description="Trigonometric Integral"       category="Extension" >
+      <formula  latex="true"  equation="A(z) \ = \  \frac{2}{\pi} {\int_{0}^{\pi }\! \left( 4\, \cos^{2}(x)-1 \right)^{z} \sin^{2}(x) \, dx}"      />
+      <sage>
+        <source>F? = lambda z: (2/pi)*integral((4*cos(x)^2-1)^z*sin(x)^2,x,0,pi)</source>
+        <source>print [F?(z) for z in (0..12)]</source>
+      </sage>
+    </entry>
+    <entry description="Asymptotic estimate"       category="Extension" >
+      <formula  latex="true"  equation="A(z) \ \sim \ \frac{3^{z+2}}{8\,z \sqrt{3 z \pi}} \left(1 - \frac{21}{16 z} + O(z^{-2})\right)"      />
+      <sage>
+        <source>A? = lambda z: 3^(z+2)/(8*z*sqrt(3*z*pi))*(1-21/(16*z))</source>
+        <source>print [ceil(A?(z)) for z in (1..12)]</source>
+      </sage>
+    </entry>
+  </extensions>
+  <related>
+    <ref host="oeis" text="total set partitions" id="A000110" />
+    <ref host="oeis" text="total no singeltons" id="A000296" />
+    <ref host="oeis" text="total with singletons" id="A000296" />
+    <ref host="oeis" text="total not crossing" id="A000108" />
+    <ref host="oeis" text="not crossing no singeltons" id="A005043" />
+    <ref host="oeis" text="not crossing with singletons" id="A106640" />
+    <ref host="oeis" text="total crossing" id="A016098" />
+    <ref host="oeis" text="crossing no singletons" id="A247491" />
+    <ref host="oeis" text="crossing with singletons" id="A247494" />
+  </related>
+</article>
