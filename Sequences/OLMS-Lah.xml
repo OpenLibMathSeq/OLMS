@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<article xsi:noNamespaceSchemaLocation="http://olms.onl/schemas/olms-Schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Lah Numbers">
+  <meta>
+    <id>Z0002</id>
+    <type>2dim</type>
+    <author>Peter Luschny</author>
+    <reviewer>NN</reviewer>
+    <date>2015-01-12</date>
+    <revision>1</revision>
+  </meta>
+  
+  <sequence>
+    <references>
+      <ref host="oeis" id="A271703" />
+      <ref host="oeis" id="A105278" />
+      <ref host="oeis" id="A111596" />
+    </references>
+    <row>1,0,1,0,2,1,0,6,6,1,0,24,36,12,1,0,120,240,120,20,1,0,720,1800,1200,300,30,1,0</row>
+  </sequence>
+  
+  <triangle>
+    <row>1</row>
+    <row>0, 1</row>
+    <row>0, 2, 1</row>
+    <row>0, 6, 6, 1</row>
+    <row>0, 24, 36, 12, 1</row>
+    <row>0, 120, 240, 120, 20, 1</row>
+    <row>0, 720, 1800, 1200, 300, 30, 1</row>
+    <row>0, 5040, 15120, 12600, 4200, 630, 42, 1</row>
+  </triangle>
+  
+  <rectangle>
+    <row>1,1,1,1,1,1</row>
+    <row>0,2,6,12,20,30</row>
+    <row>0,6,36,120,300,630</row>
+    <row>0,24,240,1200,4200,11760</row>
+    <row>0,120,1800,12600,58800,211680</row>
+    <row>0,720,15120,141120,846720,3810240</row>
+    <arow>A000012,A002378,A083374,A253285</arow>
+    <acol>A000007,A000142,A001286,A001754,A001755,A001777</acol>
+  </rectangle>
+  
+  <implementation>
+    <sage>
+      <source>class LahClass(OLMS2):</source>
+      <source>&#032;</source>
+      <source>    def row_generator(self):</source>
+      <source>        yield[1]</source>
+      <source>        L, n = [0], 0</source>
+      <source>        while True:</source>
+      <source>            L.append(1)</source>
+      <source>            for k in range(n, 0, -1):</source>
+      <source>                L[k] = L[k] * (n + k) + L[k - 1]</source>
+      <source>            yield L</source>
+      <source>            n += 1</source>
+    </sage>
+  </implementation>
+  
+  <interpretations>
+    <entry description="" category="Interpretation">
+      <references>
+        <ref host="wikipedia" text="Posets" id="Partially_ordered_set" />
+      </references>
+      <formula latex="false" equation="Partially ordered sets (posets) on n elements that consist entirely of k chains (nonempty, linearly ordered subsets)."  />
+    </entry>
+    
+    <entry description="" category="Interpretation">
+      <references>
+        <ref host="wikipedia" text="Set partitions" id="Partition_of_a_set" />
+      </references>
+      <formula latex="false" equation="Number of ways to split {1,..,n} into an ordered collection of n+1-k nonempty sets that are noncrossing)." />
+    </entry>
+    
+    <entry description="" category="Interpretation">
+      <references>
+        <ref host="findstat" text="Dyck paths" id="DyckPaths" />
+      </references>
+      <formula latex="false" equation="Dyck n-paths with n+1-k peaks labeled 1,2,..n+1-k in some order." />
+    </entry>
+  </interpretations>
+  
+  <generators>
+    <entry description="Recurrence" category="Generator">
+      <formula latex="true" equation="T_{n,\,n} = 1, \ T_{n,\,k} = 0 \ (k \lt 0), \\ T_{n,\,k} \ = \ T_{n-1,\,k-1} + (n+k-1)T_{n-1,\,k}" />
+      <sage>
+        <source>def F?(n,k):</source>
+        <source>if n==k: return 1</source>
+        <source>if k&lt;0 or k&gt;n: return 0</source>
+        <source>return F?(n-1,k-1) + (n+k-1)*F?(n-1,k)</source>
+        <source></source>
+        <source>for n in range(8): print [F?(n,k) for k in(0..n)]</source>
+        <source>Lah.triangle(8)</source>
+      </sage>
+    </entry>
+    
+    <entry description="Generating function of triangle row polynomials" category="Generator">
+      <formula latex="true" equation="L_n(x) \ = \  \sum_{0 \le k \le n} T_{n,k}\, x^k" />
+      <sage>
+        <source>F? = lambda n, x: sum(Lah(n,k)*x^k for k in (0..n))</source>
+        <source>for n in (0..7): print F?(n,x) # (slow)</source>
+        <source>Lah.polynomials(8) # based on generator (fast)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <formula latex="true" equation="L_n(x) \ = \ n!\, [t^n]\, \exp\left(\frac{tx}{1-t}\right)" />
+      <sage>
+        <source>t = var(\'t\')</source>
+        <source>F? = exp(t*x/(1-t))</source>
+        <source>for poly in EGF(F?, 7): print poly</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <references>
+        <ref host="dlmf" text="Hypergeometric series &lt;sub&gt;1&lt;/sub&gt;F&lt;sub&gt;1&lt;/sub&gt;" id="16.2#i" />
+      </references>
+      <formula latex="true" equation="L_n(x) \ = \ n! \,x\,  F\left(\genfrac{}{\vert}{0pt}{}{-n+1}{2} -x \right) \quad (n \ge 1)" />
+      <sage>
+        <source>F? = lambda n, x: factorial(n)*x*hypergeom([1-n],[2],-x) if n>0 else 1</source>
+        <source>for n in (0..7): print expand(F?(n,x))</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <references>
+        <ref host="dlmf" text="Kummer U" id="13.2#E7" />
+      </references>
+      <formula latex="true" equation="L_n(x) \ = \  (-1)^{n-1} \,x\, U_{1-n,2}(-x)" />
+      <sage>
+        <source># presently no implementation available</source>
+        <source>F? = lambda n: 0</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <references>
+        <ref host="dlmf" text="L&lt;sup&gt;(1)&lt;/sup&gt;&lt;sub&gt;n&lt;/sub&gt;  generalized Laguerre polynomials" id="18.5#E12" />
+      </references>
+      <formula latex="true" equation="L_n(x) \ = \ (n-1)! \,x\,  L_{n-1}^{(1)}(-x) \quad (n \ge 1)" />
+      <sage>
+        <source>F? = lambda n, x: factorial(n-1)*x*gen_laguerre(n-1,1,-x) if n>0 else 1</source>
+        <source>for n in (0..7): print expand(F?(n,x))</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator" description="Reflected Lah polynomials,">
+      <references>
+        <ref host="dlmf" text="Hypergeometric series &lt;sub&gt;2&lt;/sub&gt;F&lt;sub&gt;0&lt;/sub&gt;" id="16.2#i" />
+      </references>
+      <formula latex="true" equation="x^n \, L_n(1/x) \ = \  F\left(\genfrac{}{\vert}{0pt}{}{-n+1,\,-n}{-} {x} \right) " />
+      <sage>
+        <source>P = Lah.polynomials(8)</source>
+        <source>F?_lhs = lambda n, x: x^n*P[n](x=1/x)</source>
+        <source>F?_rhs = lambda n, x: hypergeom([-n,-n+1],[], x)</source>
+        <source>for n in (0..7): print expand(F?_lhs(n, x))</source>
+        <source>for n in (0..7): print expand(F?_rhs(n, x))</source>
+      </sage>
+    </entry>
+    
+    <entry description="Generating polynomial of rectangle rows, " category="Generator">
+      <references>
+        <ref host="oeis" text="Stirling cycle number" id="A132393" />
+        <ref host="oeis" id="A254881" />
+      </references>
+      <formula latex="true" equation="S_n(x) \  = \  \delta_{n,0} + \sum_{k=0}^{2n} x^k \sum_{j=0}^{k-1} \genfrac{ [ }{ ] }{0pt}{}{n+1}{j+1} \genfrac{ [ }{ ] }{0pt}{}{n}{k-j}" />
+      <sage>
+        <source>F? = lambda n, x: sum(x^k*sum(stirling_number1(n+1,j+1)*stirling_number1(n,k-j)\\</source>
+        <source>for j in (0..k-1)) for k in (0..2*n)) if n>0 else 1</source>
+        <source>for n in (0..5): print F?(n,x).list()</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <formula latex="true" equation="T_{n+k,\, k} \ = \ S_n(k) / n!" />
+      <sage>
+        <source>for n in (0..6): print [F§(n, k)/factorial(n) for k in range(7)]</source>
+        <source>for n in (0..6): print Lah.rectangle().row(n,7)</source>
+      </sage>
+    </entry>
+    
+    <entry description="Generating rational function of rectangle rows, " category="Generator">
+      <references>
+        <ref host="oeis" id="A253284 " />
+      </references>
+      <formula latex="true" equation="G_n(x) \ = \ -\sum_{k=0}^n \frac{(n+1)!}{k+1} \binom{n+k}{n} \binom{n}{k} (x-1)^{-(n+k+1)}" />
+      <sage>
+        <source>F? = lambda n,x: -sum((factorial(n+1)/(k+1))*binomial(n+k,n)\\</source>
+        <source>*binomial(n,k)/(x-1)^(n+k+1) for k in(0..n))</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <formula latex="true" equation="T_{n+k,\, k} \  = \  [x^k] \, G_n(x)" />
+      <sage>
+        <source>for n in (0..6): print F§(n,x).taylor(x, 0, 6).list()</source>
+        <source>for n in (0..6): print Lah.rectangle().row(n,7)</source>
+      </sage>
+    </entry>
+    
+    <entry description="Generating exponential function of rectangle columns, " category="Generator">
+      <references>
+        <ref host="oeis" id="A253283" />
+      </references>
+      <formula latex="true" equation="R_n(x) \  = \  \frac{d^n}{d x^n} \left( \frac{1}{n!} \left( \frac{x}{1-x} \right)^n \right)" />
+      <sage>
+        <source>F? = lambda n: diff((x/(1-x))^n/factorial(n),x,n)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <formula latex="true" equation="T_{n+k,\, n} \  = \  k! \, [x^k] R_n(x) \quad (n \ge 1)" />
+      <sage>
+        <source>f = [factorial(k) for k in (0..6)]</source>
+        <source>for n in (1..5):</source>
+        <source>t = F§(n).taylor(x,0,6).list()</source>
+        <source>print [a*b for a,b in zip(t, f)]</source>
+        <source>for n in (1..5):</source>
+        <source>print Lah.rectangle().column(n,7)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Generator">
+      <references>
+        <ref host="olms" text="Exponential Riordan array" id="RiordanArray" />
+      </references>
+      <formula latex="true" equation="T_{n,\, k} \ = \  \frac{n!}{k!} \left[ 1 \mid \frac{x}{1-x} \right]_{n,\ k}" />
+      <sage>
+        <source>F? = lambda n: riordan_array(1, x/(1-x), n, exp=true)</source>
+        <source>print F?(8)</source>
+      </sage>
+    </entry>
+    
+  </generators>
+  
+  <formulas>
+    <entry description="For all integers n, k: " category="Formula">
+      <references>
+        <ref host="oeis" text="Stirling cycle number" id="A132393" />
+        <ref host="oeis" text="Stirling subset number" id="A048993" />
+      </references>
+      <formula latex="true" equation="T_{n,\,k} \ = \ \sum \limits_{j\,=\,k}^{n} \genfrac[]{0pt}{}{n}{j} \genfrac\{\}{0pt}{}{j}{k}" />
+      <sage>
+        <source>F? = lambda n, k: sum(stirling_number1(n,j)*stirling_number2(j,k,\'gap\') for j in (k..n))</source>
+        <source>for n in (-5..5): print([F?(n,k) for k in (-5..5)])</source>
+      </sage>
+    </entry>
+    
+    <entry description="Triangle for 0 &#8804; k &#8804; n:" category="Formula">
+      <formula latex="true" equation="T_{n,\,k} \ = \ (n-k)! \binom{n}{n-k} \binom{n-1}{n-k}" />
+      <sage>
+        <source>F? = lambda n,k: factorial(n-k)*binomial(n,n-k)*binomial(n-1,n-k)</source>
+        <source>for n in range(8): print [F?(n,k) for k in (0..n)]</source>
+        <source>Lah.triangle(8)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Formula">
+      <references>
+        <ref host="oeis" id="A103371" />
+      </references>
+      <formula latex="true" equation="\frac{T_{n,\,k}}{(n-k)!} \  = \  \binom{n}{n-k} \binom{n-1}{n-k}" />
+      <sage>
+        <source>F?_lhs = lambda n,k: Lah(n,k)/factorial(n-k)</source>
+        <source>F?_rhs = lambda n,k: binomial(n,n-k)*binomial(n-1,n-k)</source>
+        <source>check2(F?_lhs, F?_rhs, 8)</source>
+      </sage>
+    </entry>
+    
+    <entry description="Little Narayana numbers N(n,k)," category="Formula">
+      <references>
+        <ref host="oeis" id="A090181" />
+      </references>
+      <formula latex="true" equation="T_{n,\,k} \  = \  (n-k+1)! \, N_{n,\,k}" />
+      <sage>
+        <source>N = lambda n,k: binomial(n,n-k)*binomial(n-1,n-k)/(n-k+1)</source>
+        <source>F? = lambda n,k: factorial(n-k+1)*N(n,k)</source>
+        <source>for n in range(8): print [F?(n,k) for k in (0..n)]</source>
+        <source>Lah.triangle(8)</source>
+      </sage>
+    </entry>
+    
+    <entry description="Triangle, T&lt;sub&gt;0,0&lt;/sub&gt; = 1 and for 0 &#8804; k &#8804; n and n &gt; 0:" category="Formula">
+      <formula latex="true" equation="T_{n,\,k} \  = \  \frac{n\,k}{(n-k)!} \left((n-1)^\underline{n-k-1}\right)^2 \quad (n \ge 1)" />
+      <sage>
+        <source>F? = lambda n, k: n*k*falling_factorial(n-1,n-k-1)^2/factorial(n-k) if n>0 else 1</source>
+        <source>for n in range(8): print [F?(n,k) for k in (0..n)]</source>
+        <source>Lah.triangle(8)</source>
+      </sage>
+    </entry>
+    
+    <entry description="Rows of rectangle" category="Formula">
+      <formula latex="true" equation="T_{n+k,\,k} \ = \ \frac{(n+k)!}{k!} \binom{n+k-1}{k-1}" />
+      <sage>
+        <source>F? = lambda n,k: factorial(n+k)*Binomial(n+k-1,k-1)/factorial(k) # Binomial!</source>
+        <source>for n in (0..6): print [F?(n,k) for k in range(7)]</source>
+        <source>for n in (0..6): print Lah.rectangle().row(n,7)</source>
+      </sage>
+    </entry>
+    
+    <entry description="Columns of rectangle" category="Formula">
+      <formula latex="true" equation="T_{n+k,\,n} \  = \  \frac{(n+k)!}{n!} \binom{n+k-1}{n-1} \quad (n \ge 1)" />
+      <sage>
+        <source>F? = lambda n, k: factorial(n+k)*Binomial(n+k-1,n-1)/factorial(n) # Binomial!</source>
+        <source>for n in (0..5): print [F?(n,k) for k in range(7)]</source>
+        <source>for n in (0..5): print Lah.rectangle().column(n,7)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Formula">
+      <references>
+        <ref host="oeis" text="Diagonal of rectangle" id="A187535" />
+        <ref host="oeis" text="C&lt;sub&gt;n&lt;/sub&gt; Catalan number" id="A000108" />
+      </references>
+      <formula latex="true" equation="T_{2n,\,n} \ = \  (n+1)! \binom{2n-1}{n} \, C_{n}" />
+      <sage>
+        <source>F? = lambda n: factorial(n+1)*binomial(2*n-1,n)*catalan_number(n)</source>
+        <source>print [F?(n) for n in range(8)]</source>
+        <source>print Lah.triangle().center(8)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Formula">
+      <references>
+        <ref host="oeis" text="Diagonal of rectangle" id="A187535" />
+        <ref host="oeis" text="&#915; function" id="A000142" />
+      </references>
+      <formula latex="true" equation="T_{2n,\,n} \ = \ \frac{2}{n} \frac{\Gamma(2n)^2}{\Gamma(n)^3} \quad (n \ge 1)" />
+      <sage>
+        <source>F? = lambda n: 2*gamma(2*n)^2/(n*gamma(n)^3) if n>0 else 1</source>
+        <source>print [F?(n) for n in range(8)]</source>
+        <source>print Lah.triangle().center(8)</source>
+      </sage>
+    </entry>
+  
+  </formulas>
+
+  <transforms>
+    <entry category="Transforms">
+      <references>
+        <ref host="oeis" text="Row sums" id="A000262" />
+        <ref host="oeis" text="Stirling cycle number" id="A132393" />
+        <ref host="oeis" text="B&lt;sub&gt;k&lt;/sub&gt; Bell number" id="A000110" />
+        <ref host="olms" text="Lah transformation" id="LahTrans" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n(1) \ = \ \sum \limits_{k=0}^{n} \genfrac[]{0pt}{}{n}{k} B_{k}" />
+      <sage>
+        <source>F?_rhs = lambda n: sum(stirling_number1(n,k)*bell_number(k) for k in (0..n))</source>
+        <source>F?_lhs = Lah.transform(const(1))</source>
+        <source>check(F?_lhs, F?_rhs, 9)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Transforms">
+      <references>
+        <ref host="oeis" text="Row sums" id="A000262" />
+        <ref host="dlmf" text="Kummer U" id="13.2#E7" />
+        <ref host="olms" text="Lah transformation" id="LahTrans" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n(1) \ = \  (-1)^{n-1} U_{1-n,2}(-1)" />
+      <sage>
+        <source># For n>14 adjust the precision!</source>
+        <source>F?_rhs = lambda n: round((-1)^(n+1)*hypergeometric_U(1-n, 2, -1, \'scipy\'))</source>
+        <source>F?_lhs = Lah.transform(const(1))</source>
+        <source>check(F?_lhs, F?_rhs, 9)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Transforms">
+      <references>
+        <ref host="oeis" text="Alternating row sums" id="A111884" />
+        <ref host="dlmf" text="Hypergeometric series &lt;sub&gt;2&lt;/sub&gt;F&lt;sub&gt;0&lt;/sub&gt;" id="16.2#i" />
+        <ref host="olms" text="Inverse Lah transformation" id="LahTransInv" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n^{*}(1) \ = \ F\left(\genfrac{}{\vert}{0pt}{}{-n+1,\,-n}{-} -1\right)" />
+      <sage>
+        <source>F?_lhs = Lah.transform(const(1), inv = true)</source>
+        <source>F?_rhs = lambda n: hypergeom([-n+1,-n], [], -1)</source>
+        <source>check(F?_lhs, F?_rhs, 11)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Transforms">
+      <references>
+        <ref host="oeis" id="A052852" />
+        <ref host="dlmf" text="Hypergeometric series &lt;sub&gt;1&lt;/sub&gt;F&lt;sub&gt;1&lt;/sub&gt;" id="16.2#i" />
+        <ref host="olms" text="Lah transformation" id="LahTrans" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n(k) \ = \ \frac{(n+1)!}{2} F\left(\genfrac{}{\vert}{0pt}{}{-n+1}{3} -1\right) \quad (n \ge 1)" />
+      <sage>
+        <source>F?_lhs = Lah.transform(count(0))</source>
+        <source>F?_rhs = lambda n: factorial(n+1)*hypergeom([-n+1],[3],-1)/2 if n>0 else 0</source>
+        <source>check(F?_lhs, F?_rhs, 11)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Transforms">
+      <references>
+        <ref host="oeis" id="A103194" />
+        <ref host="dlmf" text="Hypergeometric series &lt;sub&gt;1&lt;/sub&gt;F&lt;sub&gt;1&lt;/sub&gt;" id="16.2#i" />
+        <ref host="olms" text="Lah transformation" id="LahTrans" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n(k^{2}) \ = \  n\, n! \, F\left(\genfrac{}{\vert}{0pt}{}{-n+1}{2} -1\right)" />
+      <sage>
+        <source>F?_lhs = Lah.transform(square())</source>
+        <source>F?_rhs = lambda n: n*factorial(n)*hypergeom([-n+1],[2],-1)</source>
+        <source>check(F?_lhs, F?_rhs, 11)</source>
+      </sage>
+    </entry>
+
+    <entry category="Transforms">
+      <references>
+        <ref host="oeis" id="A256467" />
+        <ref host="dlmf" text="Hypergeometric series &lt;sub&gt;2&lt;/sub&gt;F&lt;sub&gt;2&lt;/sub&gt;" id="16.2#i" />
+        <ref host="olms" text="Inverse Lah transformation" id="LahTransInv" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n^{*}(k^{2}) \ = \ (-1)^{n+1}\,  n! \, F\left(\genfrac{}{\vert}{0pt}{}{-n+1, 2}{1, 1} 1 \right) \quad (n \ge 1)" />
+      <sage>
+        <source>F?_lhs = Lah.transform(square(), inv = true)</source>
+        <source>F?_rhs = lambda n: (-1)^(n+1)*factorial(n)*hypergeom([-n+1,2],[1,1],1) if n>0 else 0</source>
+        <source>check(F?_lhs, F?_rhs, 11)</source>
+      </sage>
+    </entry>
+
+    <entry category="Transforms">
+      <references>
+        <ref host="oeis" id="A002866" />
+        <ref host="olms" text="Lah transformation" id="LahTrans" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n(k!) \ = \ n! \, 2^{n-1} \quad  (n \ge 1)" />
+      <sage>
+        <source>F?_lhs = Lah.transform(fact())</source>
+        <source>F?_rhs = lambda n: 2^(n-1)*factorial(n) if n>0 else 1</source>
+        <source>check(F?_lhs, F?_rhs, 11)</source>
+      </sage>
+    </entry>
+
+    <entry category="Transforms">
+      <references>
+        <ref host="dlmf" text="L&lt;sub&gt;n&lt;/sub&gt; Laguerre polynomials" id="18.5#E12" />
+        <ref host="oeis" id="A002720" />
+        <ref host="olms" text="Lah transformation" id="LahTrans" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n(k+1) \ = \ n! \, L_{n}(-1)" />
+      <sage>
+        <source>F?_lhs = Lah.transform(count(1))</source>
+        <source>F?_rhs = lambda n: factorial(n)*laguerre(n,-1)</source>
+        <source>check(F?_lhs, F?_rhs, 11)</source>
+      </sage>
+    </entry>
+
+    <entry category="Transforms">
+      <references>
+        <ref host="dlmf" text="L&lt;sub&gt;n&lt;/sub&gt; Laguerre polynomials" id="18.5#E12" />
+        <ref host="oeis" id="A202410" />
+        <ref host="olms" text="Inverse Lah transformation" id="LahTransInv" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n^{*}(k+1) \  = \ (-1)^n \, n! \, (L_{n}(1) - 2\,L_{n-1}(1) ) \quad (n\ge 1)" />
+      <sage>
+        <source>F?_lhs = Lah.transform(count(1), inv = true)</source>
+        <source>F?_rhs = lambda n: (-1)^n*factorial(n)*(laguerre(n,1)-2*laguerre(n-1,1)) if n>0 else 1</source>
+        <source>check(F?_lhs, F?_rhs, 11)</source>
+      </sage>
+    </entry>
+
+    <entry description="Connecting constants" category="Transforms">
+      <references>
+        <ref host="oeis" text="falling factorials" id="A008279" />
+        <ref host="oeis" text="rising factorials" id="A124320" />
+      </references>
+      <formula latex="true" equation="\mathbb{T}_n(x^{\underline{k}}) \  = \  x^{\overline{n}}" />
+      <sage>
+        <source>F?_lhs = lambda n: sum(Lah(n,k)*falling_factorial(x,k) for k in (0..n)).expand()</source>
+        <source>F?_rhs = lambda n: rising_factorial(x,n).expand()</source>
+        <source>check(F?_lhs, F?_rhs, 7)</source>
+      </sage>
+    </entry>
+
+    <entry category="Transforms">
+      <references>
+        <ref host="olms" text="Partition transform" id="PartitionTrans" />
+      </references>
+      <formula latex="true" equation="T_{n,\,k} \ =\  (-1)^{k} \frac{n!}{k!} \operatorname{P}_{n,k}(1,1,1, \ldots)" />
+      <sage>
+        <source>def Ptrans(f, dim, norm = None):</source>
+        <source>    i = 1; F = [1]</source>
+        <source>    while i &lt;= dim: F.append(F[i-1]*f(i)); i += 1</source>
+        <source>    C = [[0 for k in range(m+1)] for m in range(dim)]</source>
+        <source>    C[0][0] = 1</source>
+        <source>    for m in (1..dim-1):</source>
+        <source>        C[m][m] = -C[m-1][m-1]*F[1]</source>
+        <source>        for k in range(m-1, 0, -1):</source>
+        <source>            C[m][k] = -sum(F[i]*C[m-i][k-1] for i in (1..m-k+1))</source>
+        <source>    if norm == None: return C</source>
+        <source>    for m in (1..dim-1):</source>
+        <source>        for k in (1..m): C[m][k] *= norm(m,k)</source>
+        <source>    return C</source>
+        <source>lah = lambda n: 1</source>
+        <source>norm = lambda n, k: (-1)^k*factorial(n)/factorial(k)</source>
+        <source>Ptrans(lah, 9, norm)</source>
+      </sage>
+    </entry>
+
+    <entry category="Transforms">
+      <references>
+        <ref host="olms" text="Bell transform" id="BellTrans" />
+      </references>
+      <formula latex="true" equation="T_{n,\,k} \  = \  \operatorname{B}_{n,k}( s_m = m! - 0^m; m \ge 0)" />
+      <sage>
+        <source>s = lambda n: [factorial(k) - 0^k for k in (0..n)]</source>
+        <source>for n in range(7): print [bell_trans(n,k,s(n)) for k in (0..n)]</source>
+        <source>Lah.triangle(7)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Transforms">
+      <references>
+        <ref host="olms" text="Matrix inverse" id="MatrixInv" />
+        <ref host="oeis" id="A111596" />
+      </references>
+      <formula latex="true" equation="\operatorname{Mat}^{-1}[T_{n,k}] \ = \ \operatorname{Mat}[(-1)^{n-k}T_{n,k}]" />
+      <sage>
+        <source>signed_lah_number = lambda n,k: (-1)^(n-k)*Lah(n,k)</source>
+        <source>F?_rhs = lambda n: matrix(ZZ, n, signed_lah_number)</source>
+        <source>F?_lhs = lambda n: Lah.matrix(n).inverse()</source>
+        <source>print F?_rhs(6); print F?_lhs(6)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Transforms">
+      <references>
+        <ref host="olms" text="Exponential Riordan array" id="RiordanArray" />
+        <ref host="oeis" text="S&lt;sub&gt;n, k&lt;/sub&gt; Stirling cycle number" id="A132393" />
+        <ref host="oeis" id="A131222" />
+      </references>
+      <formula latex="true" equation="\operatorname{Mat}[T_{n,k}] \cdot \operatorname{Mat}[S_{n,k}] \  = \  \frac{n!}{k!} \left[ 1 \mid \log\left( \frac{1-x}{1-2x} \right) \right]_{n,\, k}" />
+      <sage>
+        <source>F?_lhs = lambda n: Lah.matrix(n)*matrix(ZZ, n, stirling_number1)</source>
+        <source>F?_rhs = lambda n: riordan_array(1, log((1-x)/(1-2*x)), n, exp=true)</source>
+        <source>print F?_lhs(7); print F?_rhs(7)</source>
+      </sage>
+    </entry>
+    
+    <entry category="Transforms">
+      <references>
+        <ref host="olms" text="Exponential Riordan array" id="RiordanArray" />
+        <ref host="oeis" text="S&lt;sub&gt;n, k&lt;/sub&gt; Stirling set number" id="A048993" />
+        <ref host="oeis" id="A256893" />
+      </references>
+      <formula latex="true" equation="\operatorname{Mat}[S_{n,k}] \cdot \operatorname{Mat}[T_{n,k}] \  = \  \frac{n!}{k!} \left[ 1 \mid  \frac{1}{2 - \exp(x)} \right]_{n,\, k}" />
+      <sage>
+        <source>F?_lhs = lambda n: matrix(ZZ, n, stirling_number2)*Lah.matrix(n)</source>
+        <source>F?_rhs = lambda n: riordan_array(1, 1/(2-exp(x)), n, exp=true)</source>
+        <source>print F?_lhs(7); print F?_rhs(7)</source>
+      </sage>
+    </entry>
+    
+  </transforms>
+
+  <extensions>
+    <entry description="Natural extension to n, k in Z, because of formula 15." category="Extension">
+      <formula latex="true" equation="\overline{T}(n,k) = \begin{cases} T(n,k) &amp; \text{if } n \geq 0, \, 0 \leq k \leq n; \\ T(-k,-n) &amp; \text{if }  n \lt 0, \, k \lt 0; \\ 0 &amp; \text{otherwise.} \end{cases}" />
+      <sage>
+        <source>def F?(n, k): # n, k in Z</source>
+        <source>    if n == k: return 1</source>
+        <source>    if n&lt;0 and k&lt;0: return F?(-k, -n)</source>
+        <source>    if k&lt;0 or k&gt;n: return 0</source>
+        <source>    return (k*n*gamma(n)^2) / (gamma(k+1)^2 * gamma(n-k+1))</source>
+        <source>for n in (-5..5): print([F?(n,k) for k in (-5..5)])</source>
+      </sage>
+    </entry>
+
+    <entry description="Lah numbers of order m, parametrization with the same boundary values as in formula (1)." category="Extension">
+      <references>
+        <ref host="oeis" text="A038207 (m = 0)" id="A038207" />
+        <ref host="oeis" text="A271703 (m = 1)" id="A271703" />
+        <ref host="oeis" text="A268434 (m = 2)" id="A268434" />
+        <ref host="oeis" text="A269946 (m = 3)" id="A269946" />
+      </references>
+      <formula latex="true" equation="T_{m}(n,k) = T_{m}(n-1,k-1) + (k^m + (n-1)^m)\ T_{m}(n-1,k)" />
+      <sage>
+        <source>@cached_function</source>
+        <source>def F?(m,n,k):</source>
+        <source>    if k &lt; 0 : return 0</source>
+        <source>    if k == n: return 1</source>
+        <source>    return F?(m,n-1,k-1) + (k^m + (n-1)^m)*F?(m,n-1, k)</source>
+        <source>for m in (0..2):</source>
+        <source>    for n in (0..8): print [F?(m,n,k) for k in (0..n)]</source>
+      </sage>
+    </entry>
+
+    <entry description="Half integer values, " category="Extension">
+      <references>
+        <ref host="oeis" text="rising factorials" id="A124320" />
+      </references>
+      <formula latex="true" equation="T\left(n+\frac12, \, k+\frac12\right) \ = \ \frac{(n+1)^{\overline{n}}} {(k+1)^{\overline{k}}} \frac{(n+2)^{\overline{n+1}}} {(k+2)^{\overline{k+1}}} \frac{16^{k-n}}{(n-k)!} " />
+      <sage>
+        <source>f = lambda n,k: rising_factorial(n+1,n)/rising_factorial(k+1,k)</source>
+        <source>F? = lambda n,k: f(n,k)*f(n+1,k+1)/factorial(n-k)</source>
+        <source>for n in (0..6): print [16^(n-k)*F§(n+1/2, k+1/2) for k in (0..n)]</source>
+        <source>for n in (0..6): print [F?(n,k) for k in (0..n)]</source>
+      </sage>
+    </entry>
+
+    <entry description="Complex function interpolating the triangle (the limit is understood where appropriate)." category="Extension">
+      <formula latex="true" equation="T(z, w) \ = \ \frac{z\,w }{\Gamma(z-w+1)}\left(\frac{\Gamma(z)}{\Gamma(w+1)}\right)^2" />
+      <sage>
+        <source>F? = lambda n, k: (k*n*gamma(n)^2)/(gamma(k+1)^2*gamma(n-k+1))</source>
+        <source>print "F?(0,0) =", limit(F?(n + x, k + x), x=0)</source>
+        <source>for n in (1..7): print [F?(n,k) for k in (0..n)]</source>
+      </sage>
+      <figure
+       description="Lah complex"
+      />
+    </entry>
+  </extensions>
+
+  <polyvalues description="$V_{n,k} = L_{n}(k)$, the Lah polynomials $L_{n}(x)$ are defined in (2) and (3), ">
+    <references>
+      <ref host="oeis" id="A253286" />
+    </references>
+    <row>1,1,1,1,1,1</row>
+    <row>0,1,2,3,4,5</row>
+    <row>0,3,8,15,24,35</row>
+    <row>0,13,44,99,184,305</row>
+    <row>0,73,304,801,1696,3145</row>
+    <row>0,501,2512,7623,18144,37225</row>
+    <arow>A000012,A001477,A005563,A226514</arow>
+    <acol>A000007,A000262,A052897,A255806</acol>
+  </polyvalues>
+ 
+  <related>
+    <ref host="olms" text="Stirling cycle" id="Z0004" />
+    <ref host="olms" text="Stirling subset" id="Z0003" />
+    <ref host="oeis" text="Bell numbers" id="A000110" />
+    <ref host="oeis" text="posets" id="A001035" />
+    <ref host="oeis" text="unlabeled posets" id="A000112" />
+    <ref host="oeis" text="Fubini numbers" id="A000670" />
+  </related>
+  
+</article>
