@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="http://olms.onl/schemas/OLMS-Schema.xsd" 
+name="Swing Numbers">
+<meta>
+<id>Z0003</id>
+<type>1dim</type>
+<author>Peter Luschny</author>
+<reviewer>NN</reviewer>
+<date>2016-12-02</date>
+<revision>1</revision>
+</meta>
+<sequence>
+<references>
+<ref host="oeis" id="A056040"/>
+</references>
+<row>1, 1, 2, 6, 6, 30, 20, 140, 70, 630, 252, 2772, 924, 12012, 3432, 51480</row>
+</sequence>
+<implementation>
+<sage>
+<source>class SwingClass(OLMS1):</source>
+<source>
+</source>
+<source>    def number(self, n):   # single value</source>
+<source>        return factorial(n) // factorial(n//2)^2</source>
+<source>
+</source>
+<source>    def generator(self):   # generator</source>
+<source>        r, n = 1, 0</source>
+<source>        while True:</source>
+<source>            yield r</source>
+<source>            n += 1</source>
+<source>            r = r*n if is_odd(n) else (r &lt;&lt; 2) // n</source>
+</sage>
+</implementation>
+<interpretations>
+<entry category="Interpretation">
+<references>
+<ref host="oeiswiki" text="Orbitals" id="Orbitals" />
+</references>
+<formula latex="false" equation="Swinging orbitals over n circular sectors."/>
+<figure description="Swinging orbitals"/>
+</entry>
+</interpretations>
+<generators>
+<entry description="Ordinary generating function" category="Generator">
+<formula latex="true" equation="A_{n} = [x^n] \, \frac{(1 -4 x^2+x)}{(1-4 x^2)^{3/2}}"/>
+<sage>
+<source>F? = (1 - 4 * x^2 + x) * (1 - 4 * x^2)^(-3/2)</source>
+<source>print taylor(F?, x, 0, 11).list()</source>
+</sage>
+</entry>
+<entry description="Exponential generating function " category="Generator">
+<references>
+<ref host="dlmf" text="I&lt;sub&gt;n&lt;/sub&gt; Bessel function" id="10.25#ii"/>
+</references>
+<formula latex="true" equation="A_{n} = n!\, [x^n]\, (1+x) \operatorname{I}_0(2\,x)"/>
+<sage>
+<source>F? = (1 + x)*bessel_I(0, 2*x)</source>
+<source>print [factorial(n)*c for n, c in enumerate(taylor(F?, x, 0, 11).list())]</source>
+</sage>
+</entry>
+<entry description="Polynomial generating function " category="Generator">
+<references>
+<ref host="oeis" text="swinging polynomials" id="A162246"/>
+</references>
+<formula latex="true" equation="A_{n}= [x^n] \, ((1 + x^2)^n\, +\, n\, x\, (1 + x^2)^{n-1})"/>
+<sage>
+<source>F? = lambda x, n: ((1 + x^2)^n + n*x*(1 + x^2)^(n - 1))</source>
+<source>[F?(x, n).list()[n] for n in range(12)]</source>
+</sage>
+</entry>
+<entry description="Special function " category="Generator">
+<references>
+<ref host="dlmf" text="Hypergeometric series &lt;sub&gt;3&lt;/sub&gt;F&lt;sub&gt;2&lt;/sub&gt;" id="35.8#iii"/>
+</references>
+<formula latex="true" equation="A_{n} = 2^{n-1} (n+2) \operatorname{F} \left(\genfrac{.}{\vert}{0pt}{}{-n,-n-1,1/2 \ }{-n-2,1} \ 2 \right)"/>
+<sage>
+<source>F? = lambda n: (2)^(n - 1)*(n + 2)*hypergeom([-n, -n-1, 1/2],[-n-2, 1], 2)</source>
+<source>check(F?, Swing, 12)</source>
+</sage>
+</entry>
+<entry description="Special function " category="Generator">
+<references>
+<ref host="dlmf" text="Hypergeometric series &lt;sub&gt;2&lt;/sub&gt;F&lt;sub&gt;1&lt;/sub&gt;" id="15.2#i"/>
+</references>
+<formula latex="true" equation="A_{n} \ = \  4^{\lfloor n/2 \rfloor} \operatorname{F} \left(\genfrac{}{\vert}{0pt}{}{- \lfloor n /2 \rfloor ,\  (-1)^n / 2 \ } {1 \ }\ 1 \right)"/>
+<sage>
+<source>F? = lambda n: 4^(n//2) * hypergeometric([-(n//2), (-1)^n/2], [1], 1)</source>
+<source>print [simplify(F?(n)) for n in range(12)]</source>
+</sage>
+</entry>
+<entry description="Recurrence, [·] Iverson brackets" category="Generator">
+<formula latex="true" equation="A_{n} = A_{n-1}\, n^{[n \text{ odd}]} \left(\frac4n \right)^{[n \text{ even}]}"/>
+<sage>
+<source>@cached_function</source>
+<source>def F?(n):</source>
+<source>    if n == 0: return 1</source>
+<source>    return F?(n-1) * n if is_odd(n) else (F?(n-1) &lt;&lt; 2) // n</source>
+<source>print [F?(n) for n in range(12)]</source>
+</sage>
+</entry>
+</generators>
+<formulas>
+<entry description="Prime factorization" category="Formula">
+<formula latex="true" equation="A_n = \prod_{ \substack{p \in \mathbb{P} \\ p \le n } } p^{e_p} \text{  with  } e_p = \sum_{k \ge 1} \lfloor n\, /\, p^k \rfloor \text{ mod } 2"/>
+<sage>
+<source>def F?(n):</source>
+<source>    factors = []</source>
+<source>    for prime in primes(2, n+1):</source>
+<source>        p, q = 1, n</source>
+<source>        while True:</source>
+<source>            q //= prime</source>
+<source>            if q == 0: break</source>
+<source>            if q &amp; 1 == 1:</source>
+<source>                p *= prime</source>
+<source>        if p &gt; 1: factors.append(p)</source>
+<source>    return mul(factors)</source>
+<source></source>
+<source>check(F?, Swing, 12)</source>
+</sage>
+</entry>
+<entry category="Formula">
+<references>
+<ref host="oeis" text="Factorial A000142" id="A000142"/>
+</references>
+<formula latex="true" equation="A_{n}= \frac{n!}{\lfloor n/2 \rfloor ^2 }"/>
+<sage>
+<source>F? = lambda n: factorial(n) // factorial(n//2)^2</source>
+<source>check(F?, Swing, 12)</source>
+</sage>
+</entry>
+<entry category="Formula">
+<references>
+<ref host="dlmf" text="Multinomial coefficient" id="26.4#i"/>
+</references>
+<formula latex="true" equation="A_{n} = \binom{n}{ \lfloor n \,/\,2 \rfloor, \ n\ \text{mod} \ 2\, ,\ \lfloor n \,/\,2 \rfloor }"/>
+<sage>
+<source>F? = lambda n: multinomial([n//2, n % 2, n//2])</source>
+<source>[F?(n) for n in range(12)]</source>
+</sage>
+</entry>
+<entry category="Formula">
+<references>
+<ref host="mathworld" text="Alternating product" id="Product"/>
+</references>
+<formula latex="true" equation="A_n = 2^n \prod_{0 \le k &lt; n} \left( \frac{k+1}{2} \right) ^{(-1)^k} = 2^{n - (n \ \text{mod}\ 2)} \prod_{1 \le k \le n} k^{(-1)^{k+1}}"/>
+<sage>
+<source>F? = lambda n: 2^(n - (n % 2)) * prod(k^((-1)^(k+1)) for k in (1..n))</source>
+<source>check(F?, Swing, 12)</source>
+</sage>
+</entry>
+<entry category="Formula">
+<references>
+<ref host="oeis" text="Middle binomial A001405" id="A001405"/>
+</references>
+<formula latex="true" equation="A_n = \operatorname{lcm} \left( \binom{n}{ \lfloor n\,/\,2 \rfloor}, \binom{n-1}{ \lfloor (n-1)\,/\,2 \rfloor} \right)"/>
+<sage>
+<source>F?_lhs = lambda n: Swing.number(n)</source> 
+<source>F?_rhs = lambda n: lcm(binomial(n, n//2), binomial(n-1, (n-1)//2))</source>
+<source>check(F?_lhs, F?_rhs, 12)</source>
+</sage>
+</entry>
+<entry category="Formula">
+<references>
+<ref host="oeis" text="Generalized Catalan numbers A057977" id="A057977"/>
+<ref host="oeis" text="crossing-free matchings A063549" id="A063549"/>
+</references>
+<formula latex="true" equation="\frac{A_n}{ \lfloor n\,/\,2 \rfloor + 1 } = \operatorname{gcd} \left( \binom{n+1}{ \lfloor (n+1)\,/\,2 \rfloor}, \binom{n}{ \lfloor n\,/\,2 \rfloor} \right)"/>
+<sage>
+<source>F?_lhs = lambda n: Swing.number(n) // ((n//2) + 1)</source>
+<source>F?_rhs = lambda n: gcd(binomial(n+1, (n+1)//2), binomial(n, n//2))</source>
+<source>check(F?_lhs, F?_rhs, 12)</source>
+</sage>
+</entry>
+<entry category="Formula">
+<references>
+<ref host="oeis" text="Central binomial A000984" id="A000984"/>
+</references>
+<formula latex="true" equation="A_{2n} = \binom{2n}{n}"/>
+<sage>
+<source>F?_lhs = lambda n: Swing.number(2*n)</source>
+<source>F?_rhs = lambda n: binomial(2*n, n)</source>
+<source>check(F?_lhs, F?_lhs, 12)</source>
+</sage>
+</entry>
+</formulas>
+<transforms>
+<entry category="Transforms">
+<references>
+<ref host="oeis" text="Cumulative product A163085 " id="A163085"/>
+<ref host="olms" text="Hankel2 transform" id="Hankel2Trans"/>
+</references>
+<formula latex="true" equation="\prod_{j=0..n} A_j = \frac{1}{ \left(\operatorname{H}_2\left((k+1)^{-1} \right) \right)_n }"/>
+<sage>
+<source>def n_inv():</source> 
+<source>    k = 0</source>
+<source>    while True:</source>
+<source>        yield 1/(k+1)</source>
+<source>        k += 1</source>
+<source></source>
+<source>H = hankel2_trans(n_inv())</source>
+<source>print [1/H.next() for _ in range(9)]</source>
+<source></source>
+<source>P = partial_prod(Swing.generator())</source>
+<source>print [P.next() for _ in range(9)]</source>
+</sage>
+</entry>
+</transforms>
+<extensions>
+<entry description="Interpolating function" category="Extension">
+<formula latex="true" equation="A(z) =\frac{2^{z}}{\sqrt{\pi}}\left(\frac{\Gamma\left(z\,/\,2+1\,/\,2\right)}{\Gamma\left(z\,/\,2+1\right)}\right)^{\cos z\pi}"/>
+<sage>
+<source>F? = lambda z: (2^z/sqrt(pi))*(gamma(z/2+1/2)/gamma(z/2+1))^cos(z*pi)</source>
+<source>check(F?, Swing, 12)</source>
+</sage>
+</entry>
+<entry description="Integral" category="Extension">
+<formula latex="true" equation="A(z)\,=\frac{2^{z}}{\sqrt{\pi}} \, \left( \frac{1}{\sqrt{\pi}} \int\limits_{-\pi /2}^{\pi/2} \bigl( \cos t \bigr) ^{z}\,dt \right) ^{\cos z\pi} \quad (\mathop{\mathrm Re} z &gt; -1)"/>
+<sage>
+<source>def F?(z):</source>
+<source>    t = var("t")</source>
+<source>    T = integral(cos(t)^z, t, -pi/2, pi/2)</source>
+<source>    return (2^z/sqrt(pi))*((1/sqrt(pi))*T)^cos(z*pi)</source>
+<source></source>
+<source>[F?(n) for n in range(10)]</source>
+</sage>
+</entry>
+<entry description="Asymptotic, with $\chi=4x+2$ and $C=\cos x\pi$" category="Extension">
+<formula latex="true" equation="A(x) \, \sim \frac{2^{x}}{\sqrt{\pi}}\left(\frac{8}{\chi}\right)^{C / 2} \left(1-C\left(\frac{1}{\chi^{2}}-\frac{20+C}{2\chi^{4}} + \ldots\right)\right)"/>
+<sage>
+<source>def F?(x):</source>
+<source>    chi = 4*x + 2</source>
+<source>    C = cos(pi*x)</source>
+<source>    A = 1/chi^2-(20+C)/(2*chi^4)+(1952+60*C+C^2)/(6*chi^6)</source>
+<source>    return 2^x*(8/chi)^(C/2)*(1-C*A)/sqrt(pi)</source>
+<source>print [F?(n).n() for n in (1..10)]</source>
+</sage>
+</entry>
+</extensions>
+<related>
+<ref host="oeis" id="A274888" text="q-swing"/>
+<ref host="oeis" id="A274887" text="q-factorial"/>
+<ref host="oeis" id="A063746" text="q-central-binomial"/>
+<ref host="oeis" id="A000984" text="central-binomial"/>
+</related>
+</article>
