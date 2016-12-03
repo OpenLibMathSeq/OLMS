@@ -76,9 +76,9 @@
 <formula latex="true" equation="T_{n,\,n} = 1, \ T_{n,\,k} = 0 \ (k \lt 0), \\ T_{n,\,k} \ = \ T_{n-1,\,k-1} + (n+k-1)T_{n-1,\,k}" />
 <sage>
 <source>def F?(n,k):</source>
-<source>if n==k: return 1</source>
-<source>if k&lt;0 or k&gt;n: return 0</source>
-<source>return F?(n-1,k-1) + (n+k-1)*F?(n-1,k)</source>
+<source>    if n==k: return 1</source>
+<source>    if k&lt;0 or k&gt;n: return 0</source>
+<source>    return F?(n-1,k-1) + (n+k-1)*F?(n-1,k)</source>
 <source>
 </source>
 <source>for n in range(8): print [F?(n,k) for k in(0..n)]</source>
@@ -194,10 +194,10 @@
 <sage>
 <source>f = [factorial(k) for k in (0..6)]</source>
 <source>for n in (1..5):</source>
-<source>t = F§(n).taylor(x,0,6).list()</source>
-<source>print [a*b for a,b in zip(t, f)]</source>
+<source>    t = F§(n).taylor(x,0,6).list()</source>
+<source>    print [a*b for a,b in zip(t, f)]</source>
 <source>for n in (1..5):</source>
-<source>print Lah.rectangle().column(n,7)</source>
+<source>    print Lah.rectangle().column(n,7)</source>
 </sage>
 </entry>
 <entry category="Generator">
@@ -327,7 +327,7 @@
 <formula latex="true" equation="\mathbb{T}_n(1) \ = \  (-1)^{n-1} U_{1-n,2}(-1)" />
 <sage>
 <source># For n>14 adjust the precision!</source>
-<source>F?_rhs = lambda n: round((-1)^(n+1)*hypergeometric_U(1-n, 2, -1, \'scipy\'))</source>
+<source>F?_rhs = lambda n: round((-1)^(n+1)*hypergeometric_U(1-n, 2, -1))</source>
 <source>F?_lhs = Lah.transform(const(1))</source>
 <source>check(F?_lhs, F?_rhs, 9)</source>
 </sage>
@@ -440,22 +440,10 @@
 </references>
 <formula latex="true" equation="T_{n,\,k} \ =\  (-1)^{k} \frac{n!}{k!} \operatorname{P}_{n,k}(1,1,1, \ldots)" />
 <sage>
-<source>def Ptrans(f, dim, norm = None):</source>
-<source>    i = 1; F = [1]</source>
-<source>    while i &lt;= dim: F.append(F[i-1]*f(i)); i += 1</source>
-<source>    C = [[0 for k in range(m+1)] for m in range(dim)]</source>
-<source>    C[0][0] = 1</source>
-<source>    for m in (1..dim-1):</source>
-<source>        C[m][m] = -C[m-1][m-1]*F[1]</source>
-<source>        for k in range(m-1, 0, -1):</source>
-<source>            C[m][k] = -sum(F[i]*C[m-i][k-1] for i in (1..m-k+1))</source>
-<source>    if norm == None: return C</source>
-<source>    for m in (1..dim-1):</source>
-<source>        for k in (1..m): C[m][k] *= norm(m,k)</source>
-<source>    return C</source>
 <source>lah = lambda n: 1</source>
-<source>norm = lambda n, k: (-1)^k*factorial(n)/factorial(k)</source>
-<source>Ptrans(lah, 9, norm)</source>
+<source>norm = lambda n, k: (-1)^k*factorial(n)//factorial(k)</source>
+<source>print partition_trans(lah, 9, norm)</source>
+<source>print Lah.triangle(9)</source>  
 </sage>
 </entry>
 <entry category="Transforms">
@@ -517,7 +505,7 @@
 <source>    if n == k: return 1</source>
 <source>    if n&lt;0 and k&lt;0: return F?(-k, -n)</source>
 <source>    if k&lt;0 or k&gt;n: return 0</source>
-<source>    return (k*n*gamma(n)^2) / (gamma(k+1)^2 * gamma(n-k+1))</source>
+<source>    return (k*n*gamma(n)^2) // (gamma(k+1)^2 * gamma(n-k+1))</source>
 <source>for n in (-5..5): print([F?(n,k) for k in (-5..5)])</source>
 </sage>
 </entry>
@@ -539,28 +527,27 @@
 <source>    for n in (0..8): print [F?(m,n,k) for k in (0..n)]</source>
 </sage>
 </entry>
-<entry description="Half integer values, " category="Extension">
-<references>
-<ref host="oeis" text="rising factorials" id="A124320" />
-</references>
-<formula latex="true" equation="T\left(n+\frac12, \, k+\frac12\right) \ = \ \frac{(n+1)^{\overline{n}}} {(k+1)^{\overline{k}}} \frac{(n+2)^{\overline{n+1}}} {(k+2)^{\overline{k+1}}} \frac{16^{k-n}}{(n-k)!} " />
-<sage>
-<source>f = lambda n,k: rising_factorial(n+1,n)/rising_factorial(k+1,k)</source>
-<source>F? = lambda n,k: f(n,k)*f(n+1,k+1)/factorial(n-k)</source>
-<source>for n in (0..6): print [16^(n-k)*F§(n+1/2, k+1/2) for k in (0..n)]</source>
-<source>for n in (0..6): print [F?(n,k) for k in (0..n)]</source>
-</sage>
-</entry>
 <entry description="Complex function interpolating the triangle (the limit is understood where appropriate)." category="Extension">
 <formula latex="true" equation="T(z, w) \ = \ \frac{z\,w }{\Gamma(z-w+1)}\left(\frac{\Gamma(z)}{\Gamma(w+1)}\right)^2" />
 <sage>
 <source>F? = lambda n, k: (k*n*gamma(n)^2)/(gamma(k+1)^2*gamma(n-k+1))</source>
 <source>print "F?(0,0) =", limit(F?(n + x, k + x), x=0)</source>
 <source>for n in (1..7): print [F?(n,k) for k in (0..n)]</source>
+<source>Lah.triangle(8)</source>
 </sage>
-<figure
-description="Lah complex"
-/>
+</entry>  
+<entry description="Half integer values, " category="Extension">
+<references>
+<ref host="oeis" text="rising factorials" id="A124320" />
+</references>
+<formula latex="true" equation="16^{n-k} \, T\left(n+\frac12, \, k+\frac12\right) \ = \ \frac{(n+1)^{\overline{n}}} {(k+1)^{\overline{k}}} \frac{(n+2)^{\overline{n+1}}} {(k+2)^{\overline{k+1}}} \frac{1}{(n-k)!}" />
+<sage>
+<source>f = lambda n,k: rising_factorial(n+1,n)//rising_factorial(k+1,k)</source>
+<source>F? = lambda n,k: f(n,k)*f(n+1,k+1)//factorial(n-k)</source>
+<source>for n in (0..6): print [16^(n-k)*F§(n+1/2, k+1/2) for k in (0..n)]</source>
+<source>for n in (0..6): print [F?(n,k) for k in (0..n)]</source>
+</sage>
+<figure description="Lah complex" />  
 </entry>
 </extensions>
 <polyvalues description="$V_{n,k} = L_{n}(k)$, the Lah polynomials $L_{n}(x)$ are defined in (2) and (3), ">
