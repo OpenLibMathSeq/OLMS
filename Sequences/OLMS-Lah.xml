@@ -117,8 +117,8 @@
 </references>
 <formula latex="true" equation="L_n(x) \ = \  (-1)^{n-1} \,x\, U_{1-n,2}(-x)" />
 <sage>
-<source># presently no implementation available</source>
-<source>F? = lambda n: 0</source>
+<source>F? = lambda n, x: (-1)^(n-1)*x*hypergeometric_U(1-n, 2, -x)</source>
+<source>for n in (0..6): print expand(F?(n,x).simplify_hypergeometric())</source>
 </sage>
 </entry>
 <entry category="Generator">
